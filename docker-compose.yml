@@ -1,0 +1,52 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: glucia_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: glucia
+      POSTGRES_PASSWORD: glucia_secret
+      POSTGRES_DB: glucia
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: glucia_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: glucia_api
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+    env_file:
+      - ./apps/api/.env
+    ports:
+      - "4000:4000"
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: glucia_web
+    restart: unless-stopped
+    depends_on:
+      - api
+    env_file:
+      - ./apps/web/.env.local
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:

@@ -1,0 +1,723 @@
+// ============================================================
+// Glucia — پلتفرم هوشمند مدیریت دیابت
+// PostgreSQL + Prisma — طراحی کامل دیتابیس
+// ============================================================
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ──────────────────────────────────────────────────
+
+enum Role {
+  PATIENT
+  DOCTOR
+  ADMIN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum DiabetesType {
+  TYPE1
+  TYPE2
+  GESTATIONAL
+  PREDIABETES
+  LADA
+  MODY
+}
+
+enum MeasurementContext {
+  FASTING
+  BEFORE_MEAL
+  AFTER_MEAL
+  BEFORE_SLEEP
+  AFTER_EXERCISE
+  RANDOM
+  CGM
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+  SAHOOR
+  IFTAR
+}
+
+enum GiLevel {
+  VERY_LOW
+  LOW
+  MEDIUM
+  HIGH
+  VERY_HIGH
+}
+
+enum FoodCategory {
+  RICE
+  BREAD
+  SOUP
+  STEW
+  KEBAB
+  SALAD
+  DAIRY
+  FRUIT
+  VEGETABLE
+  LEGUME
+  NUTS
+  SWEETS
+  DRINK
+  FAST_FOOD
+  TRADITIONAL
+  BREAKFAST_ITEM
+  SAUCE
+}
+
+enum InsightType {
+  PATTERN
+  PREDICTION
+  WARNING
+  ACHIEVEMENT
+  RECOMMENDATION
+  CLINICAL
+  TREND
+}
+
+enum Severity {
+  INFO
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum AppointmentKind {
+  IN_PERSON
+  VIDEO
+  CHAT
+  PHONE
+}
+
+enum NotificationChannel {
+  PUSH
+  SMS
+  EMAIL
+  TELEGRAM
+  WHATSAPP
+  IN_APP
+}
+
+enum SubscriptionPlan {
+  FREE
+  BASIC
+  PRO
+  CLINIC
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIAL
+  EXPIRED
+  CANCELLED
+  SUSPENDED
+}
+
+enum HealthLogKind {
+  WEIGHT
+  BLOOD_PRESSURE
+  SLEEP
+  ACTIVITY
+  WATER
+  STRESS
+  MOOD
+  SYMPTOM
+  NOTE
+  HBA1C
+  INSULIN_BASAL
+  INSULIN_BOLUS
+  CHOLESTEROL
+  TRIGLYCERIDE
+  KETONE
+  OXYGEN_SAT
+}
+
+enum InsulinType {
+  RAPID
+  SHORT
+  INTERMEDIATE
+  LONG
+  ULTRA_LONG
+  PREMIXED
+}
+
+enum ActivityLevel {
+  SEDENTARY
+  LIGHT
+  MODERATE
+  VIGOROUS
+  EXTREME
+}
+
+// ─── Identity & Auth ────────────────────────────────────────
+
+model User {
+  id           String    @id @default(cuid())
+  phone        String    @unique
+  email        String?   @unique
+  passwordHash String
+  fullName     String
+  avatarUrl    String?
+  role         Role      @default(PATIENT)
+  isActive     Boolean   @default(true)
+  isVerified   Boolean   @default(false)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  patient       Patient?
+  doctor        Doctor?
+  refreshTokens RefreshToken[]
+  devices       Device[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
+  subscriptions Subscription[]
+  sentMessages  Message[]   @relation("SentMessages")
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revokedAt DateTime?
+  ip        String?
+  userAgent String?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model Device {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fingerprint String
+  userAgent   String?
+  ip          String?
+  pushToken   String?
+  lastSeenAt  DateTime @default(now())
+  trusted     Boolean  @default(false)
+
+  @@unique([userId, fingerprint])
+  @@map("devices")
+}
+
+// ─── Patient ────────────────────────────────────────────────
+
+model Patient {
+  id               String       @id @default(cuid())
+  userId           String       @unique
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  birthDate        DateTime?
+  gender           Gender?
+  diabetesType     DiabetesType @default(TYPE2)
+  diagnosisYear    Int?
+  heightCm         Float?
+  weightKg         Float?
+  targetGlucoseMin Int          @default(70)
+  targetGlucoseMax Int          @default(180)
+  targetHba1c      Float?
+  activityLevel    ActivityLevel @default(SEDENTARY)
+  cgmConnected     Boolean      @default(false)
+  cgmProvider      String?
+  cgmDeviceId      String?
+  healthScore      Int          @default(50)
+  streakDays       Int          @default(0)
+  totalPoints      Int          @default(0)
+  primaryDoctorId  String?
+  primaryDoctor    Doctor?      @relation(fields: [primaryDoctorId], references: [id])
+  notes            String?
+  bloodType        String?
+  allergies        String?
+  emergencyContact String?
+
+  glucoseLogs    GlucoseLog[]
+  meals          Meal[]
+  healthLogs     HealthLog[]
+  medications    Medication[]
+  prescriptions  Prescription[]
+  aiInsights     AiInsight[]
+  appointments   Appointment[]
+  badges         PatientBadge[]
+  labFiles       LabFile[]
+  cgmReadings    CgmReading[]
+  challenges     PatientChallenge[]
+
+  @@map("patients")
+}
+
+model Doctor {
+  id             String  @id @default(cuid())
+  userId         String  @unique
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  medicalCode    String  @unique
+  specialty      String
+  subspecialty   String?
+  bio            String?
+  clinicName     String?
+  clinicAddress  String?
+  clinicPhone    String?
+  isVerified     Boolean @default(false)
+  rating         Float   @default(0)
+  reviewCount    Int     @default(0)
+  consultFee     Int?
+  videoFee       Int?
+  availableHours Json?
+
+  patients      Patient[]
+  prescriptions Prescription[]
+  appointments  Appointment[]
+  templates     PrescriptionTemplate[]
+
+  @@map("doctors")
+}
+
+// ─── Glucose & Health ───────────────────────────────────────
+
+model GlucoseLog {
+  id         String             @id @default(cuid())
+  patientId  String
+  patient    Patient            @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  valueMgDl  Int
+  context    MeasurementContext @default(RANDOM)
+  source     String             @default("manual")
+  note       String?
+  mealId     String?
+  insulinId  String?
+  trend      String?
+  measuredAt DateTime
+  createdAt  DateTime           @default(now())
+
+  @@index([patientId, measuredAt])
+  @@map("glucose_logs")
+}
+
+model CgmReading {
+  id        String   @id @default(cuid())
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  valueMgDl Int
+  trend     String?
+  source    String   @default("cgm")
+  readAt    DateTime
+  createdAt DateTime @default(now())
+
+  @@index([patientId, readAt])
+  @@map("cgm_readings")
+}
+
+model HealthLog {
+  id        String        @id @default(cuid())
+  patientId String
+  patient   Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  kind      HealthLogKind
+  value     Float?
+  systolic  Int?
+  diastolic Int?
+  text      String?
+  unit      String?
+  loggedAt  DateTime
+  createdAt DateTime      @default(now())
+
+  @@index([patientId, kind, loggedAt])
+  @@map("health_logs")
+}
+
+// ─── Iranian Foods & Meals ──────────────────────────────────
+
+model IranianFood {
+  id              String       @id @default(cuid())
+  nameFa          String       @unique
+  nameEn          String?
+  nameTranslit    String?
+  category        FoodCategory
+  servingDesc     String
+  servingGrams    Int
+  calories        Int
+  carbsG          Float
+  proteinG        Float
+  fatG            Float
+  fiberG          Float        @default(0)
+  sugarG          Float        @default(0)
+  sodiumMg        Int          @default(0)
+  glycemicIndex   Int
+  giLevel         GiLevel
+  glycemicLoad    Float
+  sugarSpikeNote  String?
+  healthierSwap   String?
+  cookingMethod   String?
+  imageUrl        String?
+  isVerified      Boolean      @default(true)
+
+  mealItems MealItem[]
+
+  @@index([category])
+  @@map("iranian_foods")
+}
+
+model Meal {
+  id            String   @id @default(cuid())
+  patientId     String
+  patient       Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  type          MealType
+  photoUrl      String?
+  aiDetected    Boolean  @default(false)
+  aiConfidence  Float?
+  totalCarbsG   Float    @default(0)
+  totalCalories Int      @default(0)
+  totalProteinG Float    @default(0)
+  totalFatG     Float    @default(0)
+  estimatedGl   Float?
+  note          String?
+  eatenAt       DateTime
+  createdAt     DateTime @default(now())
+
+  items MealItem[]
+
+  @@index([patientId, eatenAt])
+  @@map("meals")
+}
+
+model MealItem {
+  id        String      @id @default(cuid())
+  mealId    String
+  meal      Meal        @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  foodId    String
+  food      IranianFood @relation(fields: [foodId], references: [id])
+  servings  Float       @default(1)
+  gramsEaten Float?
+
+  @@map("meal_items")
+}
+
+// ─── Medications ────────────────────────────────────────────
+
+model Medication {
+  id           String      @id @default(cuid())
+  patientId    String
+  patient      Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  name         String
+  dosage       String
+  unit         String      @default("mg")
+  schedule     String
+  withFood     Boolean     @default(false)
+  isInsulin    Boolean     @default(false)
+  insulinType  InsulinType?
+  insulinUnits Int?
+  active       Boolean     @default(true)
+  startedAt    DateTime    @default(now())
+  endedAt      DateTime?
+  notes        String?
+
+  logs MedicationLog[]
+
+  @@map("medications")
+}
+
+model MedicationLog {
+  id           String     @id @default(cuid())
+  medicationId String
+  medication   Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+  takenAt      DateTime
+  skipped      Boolean    @default(false)
+  dose         Float?
+  note         String?
+
+  @@index([medicationId, takenAt])
+  @@map("medication_logs")
+}
+
+// ─── Prescriptions ──────────────────────────────────────────
+
+model Prescription {
+  id           String   @id @default(cuid())
+  patientId    String
+  patient      Patient  @relation(fields: [patientId], references: [id])
+  doctorId     String
+  doctor       Doctor   @relation(fields: [doctorId], references: [id])
+  diagnosis    String?
+  notes        String?
+  dietPlan     String?
+  exercisePlan String?
+  targetHba1c  Float?
+  followUpDays Int?
+  pdfUrl       String?
+  createdAt    DateTime @default(now())
+
+  items PrescriptionItem[]
+
+  @@index([patientId])
+  @@map("prescriptions")
+}
+
+model PrescriptionItem {
+  id             String       @id @default(cuid())
+  prescriptionId String
+  prescription   Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+  drugName       String
+  dosage         String
+  frequency      String
+  duration       String
+  instruction    String?
+  isInsulin      Boolean      @default(false)
+
+  @@map("prescription_items")
+}
+
+model PrescriptionTemplate {
+  id       String @id @default(cuid())
+  doctorId String
+  doctor   Doctor @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  title    String
+  body     Json
+
+  @@map("prescription_templates")
+}
+
+// ─── Lab Files ──────────────────────────────────────────────
+
+model LabFile {
+  id         String   @id @default(cuid())
+  patientId  String
+  patient    Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  title      String
+  fileUrl    String
+  fileType   String   @default("pdf")
+  sizeBytes  Int?
+  parsedData Json?
+  uploadedAt DateTime @default(now())
+
+  @@map("lab_files")
+}
+
+// ─── AI ─────────────────────────────────────────────────────
+
+model AiInsight {
+  id        String      @id @default(cuid())
+  patientId String
+  patient   Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  type      InsightType
+  severity  Severity    @default(INFO)
+  title     String
+  body      String
+  forDoctor Boolean     @default(false)
+  meta      Json?
+  readAt    DateTime?
+  expiresAt DateTime?
+  createdAt DateTime    @default(now())
+
+  @@index([patientId, type, createdAt])
+  @@map("ai_insights")
+}
+
+// ─── Appointments & Chat ────────────────────────────────────
+
+model Appointment {
+  id           String            @id @default(cuid())
+  patientId    String
+  patient      Patient           @relation(fields: [patientId], references: [id])
+  doctorId     String
+  doctor       Doctor            @relation(fields: [doctorId], references: [id])
+  kind         AppointmentKind   @default(VIDEO)
+  status       AppointmentStatus @default(PENDING)
+  scheduledAt  DateTime
+  durationMin  Int               @default(20)
+  note         String?
+  videoRoomId  String?
+  fee          Int?
+  isPaid       Boolean           @default(false)
+  createdAt    DateTime          @default(now())
+
+  @@index([doctorId, scheduledAt])
+  @@map("appointments")
+}
+
+model Conversation {
+  id             String   @id @default(cuid())
+  patientUserId  String
+  doctorUserId   String
+  lastMessageAt  DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  messages Message[]
+
+  @@unique([patientUserId, doctorUserId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation("SentMessages", fields: [senderId], references: [id])
+  body           String
+  attachmentUrl  String?
+  attachmentType String?
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
+}
+
+// ─── Notifications ──────────────────────────────────────────
+
+model Notification {
+  id        String              @id @default(cuid())
+  userId    String
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel   NotificationChannel @default(IN_APP)
+  title     String
+  body      String
+  severity  Severity            @default(INFO)
+  actionUrl String?
+  sentAt    DateTime?
+  readAt    DateTime?
+  createdAt DateTime            @default(now())
+
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+// ─── Billing ────────────────────────────────────────────────
+
+model Subscription {
+  id        String             @id @default(cuid())
+  userId    String
+  user      User               @relation(fields: [userId], references: [id])
+  plan      SubscriptionPlan   @default(FREE)
+  status    SubscriptionStatus @default(ACTIVE)
+  startsAt  DateTime           @default(now())
+  endsAt    DateTime?
+  autoRenew Boolean            @default(false)
+
+  payments Payment[]
+
+  @@map("subscriptions")
+}
+
+model Payment {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+  amountRial     BigInt
+  gateway        String
+  refId          String?
+  status         String       @default("pending")
+  paidAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@map("payments")
+}
+
+// ─── Gamification ───────────────────────────────────────────
+
+model Badge {
+  id          String @id @default(cuid())
+  code        String @unique
+  titleFa     String
+  description String
+  icon        String
+  color       String @default("#6366f1")
+  points      Int    @default(0)
+
+  patients PatientBadge[]
+
+  @@map("badges")
+}
+
+model PatientBadge {
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  badgeId   String
+  badge     Badge    @relation(fields: [badgeId], references: [id])
+  earnedAt  DateTime @default(now())
+
+  @@id([patientId, badgeId])
+  @@map("patient_badges")
+}
+
+model Challenge {
+  id          String   @id @default(cuid())
+  titleFa     String
+  description String
+  targetValue Int
+  unit        String
+  kind        String
+  durationDays Int
+  points      Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  participants PatientChallenge[]
+
+  @@map("challenges")
+}
+
+model PatientChallenge {
+  id          String    @id @default(cuid())
+  patientId   String
+  patient     Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  progress    Int       @default(0)
+  completed   Boolean   @default(false)
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@map("patient_challenges")
+}
+
+// ─── Audit ──────────────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  entity    String?
+  entityId  String?
+  ip        String?
+  userAgent String?
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@map("audit_logs")
+}

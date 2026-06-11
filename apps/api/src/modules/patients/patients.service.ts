@@ -1,0 +1,98 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class PatientsService {
+  constructor(private prisma: PrismaService) {}
+
+  async getProfile(userId: string) {
+    const patient = await this.prisma.patient.findUnique({
+      where: { userId },
+      include: { user: { select: { id: true, phone: true, email: true, firstName: true, lastName: true, avatarUrl: true, role: true } } },
+    });
+    if (!patient) throw new NotFoundException('بیمار یافت نشد');
+    return patient;
+  }
+
+  async updateProfile(userId: string, dto: any) {
+    const patient = await this.prisma.patient.findUnique({ where: { userId } });
+    if (!patient) throw new NotFoundException('بیمار یافت نشد');
+    const [updatedUser, updatedPatient] = await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { firstName: dto.firstName, lastName: dto.lastName, email: dto.email, avatarUrl: dto.avatarUrl },
+      }),
+      this.prisma.patient.update({
+        where: { id: patient.id },
+        data: {
+          dateOfBirth: dto.dateOfBirth ? new Date(dto.dateOfBirth) : undefined,
+          gender: dto.gender,
+          diabetesType: dto.diabetesType,
+          diagnosisYear: dto.diagnosisYear,
+          weightKg: dto.weightKg,
+          heightCm: dto.heightCm,
+          targetGlucoseMin: dto.targetGlucoseMin,
+          targetGlucoseMax: dto.targetGlucoseMax,
+          activityLevel: dto.activityLevel,
+        },
+      }),
+    ]);
+    return { ...updatedPatient, user: updatedUser };
+  }
+
+  async getDashboard(userId: string) {
+    const patient = await this.prisma.patient.findUnique({ where: { userId } });
+    if (!patient) throw new NotFoundException();
+    const now = new Date();
+    const today = new Date(now.toDateString());
+    const [recentGlucose, todayMeals, upcomingAppointment, recentInsights, badges] = await Promise.all([
+      this.prisma.glucoseLog.findMany({
+        where: { patientId: patient.id, measuredAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } },
+        orderBy: { measuredAt: 'desc' },
+        take: 10,
+      }),
+      this.prisma.meal.findMany({
+        where: { patientId: patient.id, eatenAt: { gte: today } },
+        include: { items: { include: { food: true } } },
+      }),
+      this.prisma.appointment.findFirst({
+        where: { patientId: patient.id, scheduledAt: { gte: now }, status: 'PENDING' },
+        include: { doctor: { include: { user: true } } },
+        orderBy: { scheduledAt: 'asc' },
+      }),
+      this.prisma.aiInsight.findMany({
+        where: { patientId: patient.id, expiresAt: { gt: now } },
+        orderBy: { createdAt: 'desc' },
+        take: 3,
+      }),
+      this.prisma.patientBadge.findMany({
+        where: { patientId: patient.id },
+        include: { badge: true },
+        orderBy: { earnedAt: 'desc' },
+        take: 5,
+      }),
+    ]);
+    return { patient, recentGlucose, todayMeals, upcomingAppointment, recentInsights, badges };
+  }
+
+  async getBadges(userId: string) {
+    const patient = await this.prisma.patient.findUnique({ where: { userId } });
+    if (!patient) throw new NotFoundException();
+    const [earned, all] = await Promise.all([
+      this.prisma.patientBadge.findMany({ where: { patientId: patient.id }, include: { badge: true }, orderBy: { earnedAt: 'desc' } }),
+      this.prisma.badge.findMany({ where: { isActive: true } }),
+    ]);
+    const earnedIds = new Set(earned.map(e => e.badgeId));
+    return { earned, locked: all.filter(b => !earnedIds.has(b.id)) };
+  }
+
+  async getChallenges(userId: string) {
+    const patient = await this.prisma.patient.findUnique({ where: { userId } });
+    if (!patient) throw new NotFoundException();
+    return this.prisma.patientChallenge.findMany({
+      where: { patientId: patient.id },
+      include: { challenge: true },
+      orderBy: { joinedAt: 'desc' },
+    });
+  }
+}
