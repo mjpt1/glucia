@@ -98,4 +98,31 @@ export class PatientsService {
       orderBy: { startedAt: 'desc' },
     });
   }
+
+  async logHealth(userId: string, dto: any) {
+    const patient = await this.prisma.patient.findUnique({ where: { userId } });
+    if (!patient) throw new NotFoundException();
+    return this.prisma.healthLog.create({
+      data: {
+        patientId: patient.id,
+        kind: dto.kind ?? 'BLOOD_PRESSURE',
+        systolic: dto.systolic ? Number(dto.systolic) : undefined,
+        diastolic: dto.diastolic ? Number(dto.diastolic) : undefined,
+        value: dto.value ? Number(dto.value) : undefined,
+        text: dto.text,
+        unit: dto.unit,
+        loggedAt: dto.loggedAt ? new Date(dto.loggedAt) : new Date(),
+      },
+    });
+  }
+
+  async getHealthLogs(userId: string, query: any) {
+    const patient = await this.prisma.patient.findUnique({ where: { userId } });
+    if (!patient) throw new NotFoundException();
+    return this.prisma.healthLog.findMany({
+      where: { patientId: patient.id, kind: query.kind ?? undefined },
+      orderBy: { loggedAt: 'desc' },
+      take: Math.min(Number(query.limit ?? 100), 500),
+    });
+  }
 }

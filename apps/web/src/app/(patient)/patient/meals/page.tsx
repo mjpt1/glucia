@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useFoods, useMeals, useLogMeal } from '@/hooks/useMeals';
-import { toJalaliDateTime } from '@/lib/utils';
+import { toJalaliDateTime, faToEnDigits } from '@/lib/utils';
 import { MEAL_TYPES } from '@/lib/constants';
 import { Plus, Search, Utensils, X, Flame, Wheat } from 'lucide-react';
 
@@ -101,8 +101,8 @@ export default function MealsPage() {
                       {selectedItems.map(item => (
                         <div key={item.food.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/10">
                           <span className="text-white text-sm flex-1">{item.food.nameFa}</span>
-                          <input type="number" value={item.servingGrams} min={10} max={2000}
-                            onChange={e => updateServing(item.food.id, +e.target.value)}
+                          <input type="text" inputMode="numeric" dir="ltr" value={item.servingGrams}
+                            onChange={e => updateServing(item.food.id, +(faToEnDigits(e.target.value).replace(/[^0-9]/g, '') || 0))}
                             className="w-16 bg-white/10 border border-white/10 rounded-lg px-2 py-1 text-xs text-white text-center" />
                           <span className="text-white/40 text-xs">g</span>
                           <button onClick={() => removeItem(item.food.id)} className="text-red-400 hover:text-red-300"><X size={14} /></button>

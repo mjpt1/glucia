@@ -5,6 +5,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/** Convert Persian (۰-۹) and Arabic (٠-٩) digits to Latin so numeric inputs accept Persian keyboards. */
+export function faToEnDigits(s: string): string {
+  return s
+    .replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+    .replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
+}
+
 export function toJalali(date: Date | string): string {
   const d = new Date(date);
   return new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: 'long', day: 'numeric' }).format(d);

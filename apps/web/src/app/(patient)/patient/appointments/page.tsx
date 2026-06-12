@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { toJalaliDateTime } from '@/lib/utils';
+import { JalaliDateTimePicker } from '@/components/forms/JalaliDateTimePicker';
 import { Calendar, Plus, Video, MapPin, X } from 'lucide-react';
 
 export default function AppointmentsPage() {
@@ -71,10 +72,10 @@ export default function AppointmentsPage() {
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className="text-sm text-white/60 mb-1 block">تاریخ و زمان</label>
-                  <Input type="datetime-local" value={form.scheduledAt} onChange={e => setForm(f => ({ ...f, scheduledAt: e.target.value }))} dir="ltr" />
-                </div>
+                <JalaliDateTimePicker
+                  label="تاریخ و زمان (شمسی)"
+                  onChange={(iso) => setForm(f => ({ ...f, scheduledAt: iso }))}
+                />
                 <div className="flex gap-3">
                   {[{ v: 'IN_PERSON', l: 'حضوری', icon: MapPin }, { v: 'VIDEO', l: 'آنلاین', icon: Video }].map(k => (
                     <button key={k.v} onClick={() => setForm(f => ({ ...f, kind: k.v }))}

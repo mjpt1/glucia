@@ -5,7 +5,7 @@ import { useLogGlucose } from '@/hooks/useGlucose';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { GLUCOSE_CONTEXTS } from '@/lib/constants';
-import { glucoseColor, glucoseLabel } from '@/lib/utils';
+import { glucoseColor, glucoseLabel, faToEnDigits } from '@/lib/utils';
 import { Droplets, X } from 'lucide-react';
 
 export function GlucoseLogForm({ onClose }: { onClose?: () => void }) {
@@ -39,10 +39,11 @@ export function GlucoseLogForm({ onClose }: { onClose?: () => void }) {
         <div>
           <div className="flex items-end gap-2 mb-2">
             <Input
-              type="number" placeholder="مثال: ۱۲۰" value={value} onChange={e => setValue(e.target.value)}
+              type="text" inputMode="numeric" dir="ltr" placeholder="مثال: ۱۲۰" value={value}
+              onChange={e => setValue(faToEnDigits(e.target.value).replace(/[^0-9.]/g, ''))}
               className="text-3xl font-bold h-16 text-center"
               style={{ color: isValid ? color : undefined }}
-              min={20} max={600} required
+              required
             />
             <span className="text-white/40 text-sm pb-4 whitespace-nowrap">mg/dL</span>
           </div>

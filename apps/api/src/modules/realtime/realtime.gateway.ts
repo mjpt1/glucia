@@ -39,7 +39,13 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   emitToUser(userId: string, event: string, data: any) {
-    this.server.to(`user:${userId}`).emit(event, data);
+    // On serverless (Vercel) there is no long-lived socket server; never let
+    // a realtime emit break the HTTP request that triggered it.
+    try {
+      this.server?.to(`user:${userId}`).emit(event, data);
+    } catch {
+      /* noop */
+    }
   }
 
   @SubscribeMessage('ping')

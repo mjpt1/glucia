@@ -32,3 +32,43 @@
     background-clip: text;
   }
 }
+
+/* ─── Light theme ───────────────────────────────────────────────
+   The app is authored with dark-first utility classes; these
+   overrides remap them when next-themes puts `light` on <html>. */
+html.light body { background: #eef2f7; color: #0f172a; }
+
+html.light .bg-gray-950 { background-color: #eef2f7 !important; }
+html.light .bg-gray-950\/80 { background-color: rgba(255, 255, 255, 0.85) !important; }
+html.light .bg-gray-950\/40 { background-color: rgba(255, 255, 255, 0.7) !important; }
+html.light .bg-gray-900\/95 { background-color: rgba(255, 255, 255, 0.97) !important; }
+
+html.light .text-white { color: #0f172a !important; }
+html.light .text-white\/70 { color: rgba(15, 23, 42, 0.75) !important; }
+html.light .text-white\/60 { color: rgba(15, 23, 42, 0.65) !important; }
+html.light .text-white\/50 { color: rgba(15, 23, 42, 0.55) !important; }
+html.light .text-white\/40 { color: rgba(15, 23, 42, 0.45) !important; }
+html.light .text-white\/30 { color: rgba(15, 23, 42, 0.35) !important; }
+
+html.light .bg-white\/5 { background-color: rgba(15, 23, 42, 0.04) !important; }
+html.light .bg-white\/10 { background-color: rgba(15, 23, 42, 0.07) !important; }
+html.light .hover\:bg-white\/5:hover { background-color: rgba(15, 23, 42, 0.05) !important; }
+html.light .hover\:bg-white\/10:hover { background-color: rgba(15, 23, 42, 0.08) !important; }
+html.light .hover\:text-white:hover { color: #0f172a !important; }
+
+html.light .border-white\/5 { border-color: rgba(15, 23, 42, 0.06) !important; }
+html.light .border-white\/10 { border-color: rgba(15, 23, 42, 0.12) !important; }
+html.light .border-white\/20 { border-color: rgba(15, 23, 42, 0.2) !important; }
+html.light .divide-white\/5 > * + * { border-color: rgba(15, 23, 42, 0.06) !important; }
+
+html.light .placeholder\:text-white\/30::placeholder { color: rgba(15, 23, 42, 0.35) !important; }
+
+html.light .glass {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(15, 23, 42, 0.1);
+}
+
+html.light ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.2); }
+
+/* Recharts axis/legend text + toast readability on light surfaces */
+html.light .recharts-text { fill: rgba(15, 23, 42, 0.55) !important; }

@@ -6,6 +6,7 @@ import { useLogin } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Activity, Eye, EyeOff } from 'lucide-react';
+import { faToEnDigits } from '@/lib/utils';
 
 export default function LoginPage() {
   const [phone, setPhone] = useState('');
@@ -35,7 +36,7 @@ export default function LoginPage() {
           <form onSubmit={e => { e.preventDefault(); mutate({ phone, password }); }} className="space-y-4">
             <div>
               <label className="text-sm text-white/60 mb-2 block">شماره موبایل</label>
-              <Input type="tel" placeholder="۰۹۱۲۳۴۵۶۷۸۹" value={phone} onChange={e => setPhone(e.target.value)}
+              <Input type="tel" placeholder="۰۹۱۲۳۴۵۶۷۸۹" value={phone} onChange={e => setPhone(faToEnDigits(e.target.value))}
                 required pattern="09[0-9]{9}" dir="ltr" className="text-left" />
             </div>
             <div>

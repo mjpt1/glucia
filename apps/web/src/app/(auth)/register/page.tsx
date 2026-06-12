@@ -6,12 +6,13 @@ import { useRegister } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Activity, Eye, EyeOff } from 'lucide-react';
+import { faToEnDigits } from '@/lib/utils';
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ phone: '', password: '', fullName: '' });
   const [showPwd, setShowPwd] = useState(false);
   const { mutate, isPending } = useRegister();
-  const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+  const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: k === 'phone' ? faToEnDigits(v) : v }));
 
   const valid = /^09[0-9]{9}$/.test(form.phone) && form.password.length >= 8 && form.fullName.trim().length >= 2;
 

@@ -703,6 +703,16 @@ model PatientChallenge {
   @@map("patient_challenges")
 }
 
+// ─── App Settings (admin-managed runtime config) ───────────
+
+model AppSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("app_settings")
+}
+
 // ─── Audit ──────────────────────────────────────────────────
 
 model AuditLog {

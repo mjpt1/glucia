@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { DIABETES_TYPES } from '@/lib/constants';
+import { faToEnDigits } from '@/lib/utils';
 import { User, Shield, Target } from 'lucide-react';
 
 export default function SettingsPage() {
@@ -27,7 +28,8 @@ export default function SettingsPage() {
     });
   }, [profile]);
 
-  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
+  const NUMERIC_KEYS = ['weightKg', 'heightCm', 'targetGlucoseMin', 'targetGlucoseMax'];
+  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: NUMERIC_KEYS.includes(k) ? faToEnDigits(v).replace(/[^0-9.]/g, '') : v }));
 
   const { mutate, isPending } = useMutation({
     mutationFn: (dto: any) => api.patch('/patients/profile', dto).then(r => r.data),

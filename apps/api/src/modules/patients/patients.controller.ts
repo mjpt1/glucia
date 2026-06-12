@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Query, UseGuards } from '@nestjs/common';
 import { PatientsService } from './patients.service';
 import { JwtGuard } from '../../common/guards/jwt.guard';
 import { CurrentUser } from '../../common/decorators/user.decorator';
@@ -22,4 +22,10 @@ export class PatientsController {
 
   @Get('challenges')
   getChallenges(@CurrentUser('sub') userId: string) { return this.patients.getChallenges(userId); }
+
+  @Post('health-logs')
+  logHealth(@CurrentUser('sub') userId: string, @Body() dto: any) { return this.patients.logHealth(userId, dto); }
+
+  @Get('health-logs')
+  getHealthLogs(@CurrentUser('sub') userId: string, @Query() query: any) { return this.patients.getHealthLogs(userId, query); }
 }

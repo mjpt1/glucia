@@ -6,12 +6,13 @@ import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth.store';
 import {
   Activity, LayoutDashboard, Utensils, Bot, Calendar, FileText,
-  Settings, Users, LogOut, ChevronLeft, Stethoscope, Shield
+  Settings, Users, LogOut, ChevronLeft, Stethoscope, Shield, HeartPulse
 } from 'lucide-react';
 
 const patientNav = [
   { href: '/patient/dashboard', label: 'داشبورد', icon: LayoutDashboard },
   { href: '/patient/glucose', label: 'قند خون', icon: Activity },
+  { href: '/patient/health', label: 'فشار خون', icon: HeartPulse },
   { href: '/patient/meals', label: 'وعده‌های غذایی', icon: Utensils },
   { href: '/patient/ai-coach', label: 'کوچ هوشمند', icon: Bot },
   { href: '/patient/appointments', label: 'نوبت‌ها', icon: Calendar },
@@ -24,14 +25,13 @@ const doctorNav = [
   { href: '/doctor/patients', label: 'بیماران', icon: Users },
   { href: '/doctor/prescriptions', label: 'نسخه‌ها', icon: FileText },
   { href: '/doctor/appointments', label: 'نوبت‌ها', icon: Calendar },
-  { href: '/patient/settings', label: 'تنظیمات', icon: Settings },
 ];
 
 const adminNav = [
   { href: '/admin/dashboard', label: 'داشبورد', icon: LayoutDashboard },
   { href: '/admin/users', label: 'کاربران', icon: Users },
   { href: '/admin/reports', label: 'گزارش‌ها', icon: FileText },
-  { href: '/patient/settings', label: 'تنظیمات', icon: Settings },
+  { href: '/admin/settings', label: 'تنظیمات برنامه', icon: Settings },
 ];
 
 export function Sidebar() {
@@ -98,7 +98,9 @@ export function Sidebar() {
 
       {/* Logout */}
       <div className="p-3 border-t border-white/10">
-        <button onClick={logout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-400 hover:bg-red-500/10 transition-all">
+        <button
+          onClick={() => { logout(); window.location.href = '/login'; }}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-400 hover:bg-red-500/10 transition-all">
           <LogOut size={18} />
           <span>خروج</span>
         </button>
