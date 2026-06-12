@@ -33,10 +33,10 @@ export default function DoctorPatientsPage() {
                 <Card className="hover:border-blue-500/30 transition-all cursor-pointer">
                   <CardContent className="p-4 flex items-center gap-4">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
-                      {p.user?.firstName?.[0] ?? '?'}
+                      {p.user?.fullName?.[0] ?? '?'}
                     </div>
                     <div className="flex-1">
-                      <p className="text-white font-medium">{p.user?.firstName} {p.user?.lastName}</p>
+                      <p className="text-white font-medium">{p.user?.fullName}</p>
                       <p className="text-white/40 text-xs mt-0.5">{p.user?.phone} · {p.diabetesType}</p>
                     </div>
                     <div className="text-center">

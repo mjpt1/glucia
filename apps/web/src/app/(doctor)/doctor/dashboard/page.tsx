@@ -55,10 +55,10 @@ export default function DoctorDashboard() {
                 {data?.pendingAppointments?.slice(0, 5).map((appt: any) => (
                   <div key={appt.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
                     <div className="w-9 h-9 rounded-full bg-blue-500/20 flex items-center justify-center text-sm font-bold text-blue-400">
-                      {appt.patient?.user?.firstName?.[0]}
+                      {appt.patient?.user?.fullName?.[0]}
                     </div>
                     <div className="flex-1">
-                      <p className="text-white text-sm font-medium">{appt.patient?.user?.firstName} {appt.patient?.user?.lastName}</p>
+                      <p className="text-white text-sm font-medium">{appt.patient?.user?.fullName}</p>
                       <p className="text-white/40 text-xs">{toJalaliDateTime(appt.scheduledAt)}</p>
                     </div>
                     <Badge variant="warning">در انتظار</Badge>
@@ -84,10 +84,10 @@ export default function DoctorDashboard() {
                   <Link href={`/doctor/patients/${p.id}`} key={p.id}>
                     <div className="flex items-center gap-3 p-3 rounded-xl bg-red-500/5 border border-red-500/20 hover:bg-red-500/10 transition-all">
                       <div className="w-9 h-9 rounded-full bg-red-500/20 flex items-center justify-center text-sm font-bold text-red-400">
-                        {p.user?.firstName?.[0]}
+                        {p.user?.fullName?.[0]}
                       </div>
                       <div className="flex-1">
-                        <p className="text-white text-sm font-medium">{p.user?.firstName} {p.user?.lastName}</p>
+                        <p className="text-white text-sm font-medium">{p.user?.fullName}</p>
                         <p className="text-white/40 text-xs">{p.user?.phone}</p>
                       </div>
                       <div className="text-center">

@@ -54,10 +54,10 @@ export default function AdminDashboard() {
               {data?.recentUsers?.map((u: any) => (
                 <div key={u.id} className="flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 transition-all">
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-sm font-bold text-white">
-                    {u.firstName?.[0] ?? u.phone[2]}
+                    {u.fullName?.[0] ?? u.phone[2]}
                   </div>
                   <div className="flex-1">
-                    <p className="text-white text-sm">{u.firstName} {u.lastName}</p>
+                    <p className="text-white text-sm">{u.fullName}</p>
                     <p className="text-white/40 text-xs">{u.phone}</p>
                   </div>
                   <Badge variant={roleColors[u.role] ?? 'outline'}>{roleLabels[u.role] ?? u.role}</Badge>

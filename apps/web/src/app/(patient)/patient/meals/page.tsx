@@ -22,7 +22,7 @@ export default function MealsPage() {
 
   const addFood = (food: any) => {
     if (selectedItems.find(i => i.food.id === food.id)) return;
-    setSelectedItems(prev => [...prev, { food, servingGrams: food.servingSize ?? 100 }]);
+    setSelectedItems(prev => [...prev, { food, servingGrams: food.servingGrams ?? 100 }]);
   };
 
   const removeItem = (id: string) => setSelectedItems(prev => prev.filter(i => i.food.id !== id));
@@ -38,8 +38,9 @@ export default function MealsPage() {
     }, { onSuccess: () => { setShowForm(false); setSelectedItems([]); setSearch(''); } });
   };
 
-  const totalCarbs = selectedItems.reduce((a, i) => a + (i.food.carbsPer100g ?? 0) * i.servingGrams / 100, 0);
-  const totalCal = selectedItems.reduce((a, i) => a + (i.food.caloriesPer100g ?? 0) * i.servingGrams / 100, 0);
+  const ratio = (i: { food: any; servingGrams: number }) => i.servingGrams / (i.food.servingGrams || 100);
+  const totalCarbs = selectedItems.reduce((a, i) => a + (i.food.carbsG ?? 0) * ratio(i), 0);
+  const totalCal = selectedItems.reduce((a, i) => a + (i.food.calories ?? 0) * ratio(i), 0);
 
   return (
     <DashboardLayout title="وعده‌های غذایی">
@@ -84,7 +85,9 @@ export default function MealsPage() {
                           className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/10 text-right transition-all border border-transparent hover:border-white/10">
                           <div className="flex-1">
                             <p className="text-white text-sm">{food.nameFa}</p>
-                            <p className="text-white/40 text-xs">{food.carbsPer100g}g کربوهیدرات · {food.caloriesPer100g} کالری در ۱۰۰g · GI: {food.glycemicIndex}</p>
+                            <p className="text-white/40 text-xs">
+                              {food.servingDesc} ({food.servingGrams}g) · {food.carbsG}g کربوهیدرات · {food.calories} کالری · GI: {food.glycemicIndex}
+                            </p>
                           </div>
                           <Plus size={14} className="text-blue-400 shrink-0" />
                         </button>
@@ -98,7 +101,7 @@ export default function MealsPage() {
                       {selectedItems.map(item => (
                         <div key={item.food.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/10">
                           <span className="text-white text-sm flex-1">{item.food.nameFa}</span>
-                          <input type="number" value={item.servingGrams} min={10} max={1000}
+                          <input type="number" value={item.servingGrams} min={10} max={2000}
                             onChange={e => updateServing(item.food.id, +e.target.value)}
                             className="w-16 bg-white/10 border border-white/10 rounded-lg px-2 py-1 text-xs text-white text-center" />
                           <span className="text-white/40 text-xs">g</span>
@@ -135,7 +138,7 @@ export default function MealsPage() {
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <Badge variant="default">{MEAL_TYPES.find(t => t.value === meal.mealType)?.label}</Badge>
+                    <Badge variant="default">{MEAL_TYPES.find(t => t.value === meal.type)?.label ?? meal.type}</Badge>
                     <span className="text-white/40 text-xs">{toJalaliDateTime(meal.eatenAt)}</span>
                   </div>
                   <div className="flex gap-4 text-xs text-white/50">
@@ -146,13 +149,13 @@ export default function MealsPage() {
                 <div className="flex flex-wrap gap-2">
                   {meal.items?.map((item: any) => (
                     <span key={item.id} className="px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-white/70 text-xs">
-                      {item.food?.nameFa} — {item.servingGrams}g
+                      {item.food?.nameFa} — {Math.round(item.gramsEaten ?? (item.servings ?? 1) * (item.food?.servingGrams ?? 0))}g
                     </span>
                   ))}
                 </div>
-                {meal.estimatedGlucoseRise > 0 && (
+                {meal.estimatedGl > 0 && (
                   <p className="text-orange-400/70 text-xs mt-2">
-                    تخمین افزایش قند: +{Math.round(meal.estimatedGlucoseRise)} mg/dL
+                    بار گلیسمی تخمینی: {Math.round(meal.estimatedGl)}
                   </p>
                 )}
               </CardContent>

@@ -35,8 +35,10 @@ export default function AppointmentsPage() {
   const statusLabel: Record<string, { label: string; variant: any }> = {
     PENDING: { label: 'در انتظار', variant: 'warning' },
     CONFIRMED: { label: 'تأیید شده', variant: 'success' },
+    IN_PROGRESS: { label: 'در حال انجام', variant: 'default' },
+    COMPLETED: { label: 'انجام شده', variant: 'outline' },
     CANCELLED: { label: 'لغو شده', variant: 'destructive' },
-    DONE: { label: 'انجام شده', variant: 'outline' },
+    NO_SHOW: { label: 'عدم مراجعه', variant: 'destructive' },
   };
 
   return (
@@ -64,7 +66,7 @@ export default function AppointmentsPage() {
                     <option value="">انتخاب کنید...</option>
                     {(doctors ?? []).map((d: any) => (
                       <option key={d.id} value={d.id}>
-                        دکتر {d.user?.firstName} {d.user?.lastName} — {d.specialty}
+                        دکتر {d.user?.fullName} — {d.specialty}
                       </option>
                     ))}
                   </select>
@@ -100,13 +102,13 @@ export default function AppointmentsPage() {
                     {appt.kind === 'VIDEO' ? <Video className="text-blue-400" size={20} /> : <Calendar className="text-blue-400" size={20} />}
                   </div>
                   <div className="flex-1">
-                    <p className="text-white font-medium">دکتر {appt.doctor?.user?.firstName} {appt.doctor?.user?.lastName}</p>
+                    <p className="text-white font-medium">دکتر {appt.doctor?.user?.fullName}</p>
                     <p className="text-white/50 text-sm mt-0.5">{toJalaliDateTime(appt.scheduledAt)}</p>
                     {appt.reason && <p className="text-white/30 text-xs mt-0.5">{appt.reason}</p>}
                   </div>
                   <Badge variant={s.variant}>{s.label}</Badge>
-                  {appt.kind === 'VIDEO' && appt.meetUrl && appt.status === 'CONFIRMED' && (
-                    <a href={appt.meetUrl} target="_blank" rel="noopener noreferrer">
+                  {appt.kind === 'VIDEO' && appt.videoRoomId && appt.status === 'CONFIRMED' && (
+                    <a href={`https://meet.jit.si/${appt.videoRoomId}`} target="_blank" rel="noopener noreferrer">
                       <Button size="sm" variant="outline">ورود به جلسه</Button>
                     </a>
                   )}

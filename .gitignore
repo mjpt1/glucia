@@ -10,3 +10,7 @@ dist
 .turbo
 coverage
 prisma/migrations
+.jwt-secrets.local.json
+.env.vercel-check
+
+.vercel

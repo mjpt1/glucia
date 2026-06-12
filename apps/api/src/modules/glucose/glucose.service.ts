@@ -83,7 +83,23 @@ export class GlucoseService {
       orderBy: { measuredAt: 'asc' },
     });
 
-    if (!logs.length) return { count: 0, days };
+    if (!logs.length) {
+      return {
+        count: 0,
+        days,
+        average: 0,
+        min: 0,
+        max: 0,
+        estimatedHba1c: 0,
+        timeInRange: 0,
+        timeBelow: 0,
+        timeAbove: 0,
+        coefficientOfVariation: 0,
+        dailyAverages: [] as Array<{ date: string; avg: number; min: number; max: number; count: number }>,
+        targetMin: patient.targetGlucoseMin,
+        targetMax: patient.targetGlucoseMax,
+      };
+    }
 
     const values = logs.map((l) => l.valueMgDl);
     const avg = values.reduce((a, b) => a + b, 0) / values.length;

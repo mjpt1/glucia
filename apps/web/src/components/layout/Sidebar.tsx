@@ -61,10 +61,10 @@ export function Sidebar() {
       <div className="p-4 border-b border-white/10">
         <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
-            {user?.firstName?.[0] ?? '?'}
+            {user?.fullName?.[0] ?? '?'}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">{user?.firstName} {user?.lastName}</p>
+            <p className="text-sm font-medium text-white truncate">{user?.fullName}</p>
             <div className="flex items-center gap-1">
               <RoleIcon className="w-3 h-3 text-blue-400" />
               <p className="text-xs text-white/40">{roleName}</p>

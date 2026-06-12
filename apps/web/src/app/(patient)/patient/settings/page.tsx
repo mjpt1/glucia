@@ -7,18 +7,24 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
-import { useAuthStore } from '@/store/auth.store';
 import { DIABETES_TYPES } from '@/lib/constants';
 import { User, Shield, Target } from 'lucide-react';
 
 export default function SettingsPage() {
-  const { user } = useAuthStore();
   const qc = useQueryClient();
   const { data: profile } = useQuery({ queryKey: ['patient', 'profile'], queryFn: async () => (await api.get('/patients/profile')).data });
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', diabetesType: 'TYPE_2', weightKg: '', heightCm: '', targetGlucoseMin: '70', targetGlucoseMax: '180' });
+  const [form, setForm] = useState({ fullName: '', email: '', diabetesType: 'TYPE2', weightKg: '', heightCm: '', targetGlucoseMin: '70', targetGlucoseMax: '180' });
 
   useEffect(() => {
-    if (profile) setForm({ firstName: profile.user?.firstName ?? '', lastName: profile.user?.lastName ?? '', email: profile.user?.email ?? '', diabetesType: profile.diabetesType ?? 'TYPE_2', weightKg: profile.weightKg ?? '', heightCm: profile.heightCm ?? '', targetGlucoseMin: profile.targetGlucoseMin ?? 70, targetGlucoseMax: profile.targetGlucoseMax ?? 180 });
+    if (profile) setForm({
+      fullName: profile.user?.fullName ?? '',
+      email: profile.user?.email ?? '',
+      diabetesType: profile.diabetesType ?? 'TYPE2',
+      weightKg: String(profile.weightKg ?? ''),
+      heightCm: String(profile.heightCm ?? ''),
+      targetGlucoseMin: String(profile.targetGlucoseMin ?? 70),
+      targetGlucoseMax: String(profile.targetGlucoseMax ?? 180),
+    });
   }, [profile]);
 
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
@@ -35,10 +41,7 @@ export default function SettingsPage() {
         <Card>
           <CardHeader><CardTitle className="flex items-center gap-2"><User size={16} />اطلاعات شخصی</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div><label className="text-xs text-white/60 mb-1 block">نام</label><Input value={form.firstName} onChange={e => set('firstName', e.target.value)} /></div>
-              <div><label className="text-xs text-white/60 mb-1 block">نام خانوادگی</label><Input value={form.lastName} onChange={e => set('lastName', e.target.value)} /></div>
-            </div>
+            <div><label className="text-xs text-white/60 mb-1 block">نام و نام خانوادگی</label><Input value={form.fullName} onChange={e => set('fullName', e.target.value)} /></div>
             <div><label className="text-xs text-white/60 mb-1 block">ایمیل</label><Input type="email" value={form.email} onChange={e => set('email', e.target.value)} dir="ltr" /></div>
             <div className="grid grid-cols-2 gap-3">
               <div><label className="text-xs text-white/60 mb-1 block">وزن (kg)</label><Input type="number" value={form.weightKg} onChange={e => set('weightKg', e.target.value)} /></div>

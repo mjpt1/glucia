@@ -9,11 +9,11 @@ export class MealsService {
   async searchFoods(query: string, category?: string) {
     return this.prisma.iranianFood.findMany({
       where: {
-        isActive: true,
         ...(category && { category: category as any }),
         OR: [
           { nameFa: { contains: query, mode: 'insensitive' } },
           { nameEn: { contains: query, mode: 'insensitive' } },
+          { nameTranslit: { contains: query, mode: 'insensitive' } },
         ],
       },
       orderBy: { nameFa: 'asc' },
@@ -23,7 +23,7 @@ export class MealsService {
 
   async getAllFoods(category?: string) {
     return this.prisma.iranianFood.findMany({
-      where: { isActive: true, ...(category && { category: category as any }) },
+      where: { ...(category && { category: category as any }) },
       orderBy: [{ category: 'asc' }, { nameFa: 'asc' }],
     });
   }
@@ -37,38 +37,52 @@ export class MealsService {
   async logMeal(userId: string, dto: any) {
     const patient = await this.prisma.patient.findUnique({ where: { userId } });
     if (!patient) throw new NotFoundException();
+
+    const items: Array<{ foodId: string; servingGrams?: number; servings?: number }> = dto.items ?? [];
+    const foods = await this.prisma.iranianFood.findMany({
+      where: { id: { in: items.map((i) => i.foodId) } },
+    });
+    const foodMap = new Map(foods.map((f) => [f.id, f]));
+
+    let totalCalories = 0;
+    let totalCarbsG = 0;
+    let totalProteinG = 0;
+    let totalFatG = 0;
+    let estimatedGl = 0;
+
+    const itemRows = items
+      .filter((i) => foodMap.has(i.foodId))
+      .map((i) => {
+        const food = foodMap.get(i.foodId)!;
+        const grams = i.servingGrams ?? (i.servings ?? 1) * food.servingGrams;
+        const ratio = grams / food.servingGrams;
+        totalCalories += food.calories * ratio;
+        totalCarbsG += food.carbsG * ratio;
+        totalProteinG += food.proteinG * ratio;
+        totalFatG += food.fatG * ratio;
+        estimatedGl += food.glycemicLoad * ratio;
+        return { foodId: i.foodId, servings: ratio, gramsEaten: grams };
+      });
+
     const meal = await this.prisma.meal.create({
       data: {
         patientId: patient.id,
-        mealType: dto.mealType ?? 'LUNCH',
+        type: dto.mealType ?? dto.type ?? 'LUNCH',
         eatenAt: dto.eatenAt ? new Date(dto.eatenAt) : new Date(),
         note: dto.note,
         photoUrl: dto.photoUrl,
-        items: {
-          create: dto.items.map((item: any) => ({
-            foodId: item.foodId,
-            servingGrams: item.servingGrams,
-          })),
-        },
+        totalCalories: Math.round(totalCalories),
+        totalCarbsG: Math.round(totalCarbsG * 10) / 10,
+        totalProteinG: Math.round(totalProteinG * 10) / 10,
+        totalFatG: Math.round(totalFatG * 10) / 10,
+        estimatedGl: Math.round(estimatedGl * 10) / 10,
+        items: { create: itemRows },
       },
       include: { items: { include: { food: true } } },
     });
 
-    // Compute nutrition totals
-    const totals = this.computeTotals(meal.items as any);
-    await this.prisma.meal.update({
-      where: { id: meal.id },
-      data: {
-        totalCalories: totals.calories,
-        totalCarbsG: totals.carbs,
-        totalProteinG: totals.protein,
-        totalFatG: totals.fat,
-        totalFiberG: totals.fiber,
-        estimatedGlucoseRise: totals.glucoseRise,
-      },
-    });
-
-    return { ...meal, totals };
+    const avgGi = foods.length ? foods.reduce((a, f) => a + f.glycemicIndex, 0) / foods.length : 50;
+    return { ...meal, estimatedGlucoseRise: Math.round(estimateGlucoseRise(totalCarbsG, avgGi)) };
   }
 
   async getMeals(userId: string, query: any) {
@@ -77,7 +91,7 @@ export class MealsService {
     return this.prisma.meal.findMany({
       where: {
         patientId: patient.id,
-        mealType: query.mealType,
+        type: query.mealType ?? query.type,
         eatenAt: {
           gte: query.from ? new Date(query.from) : new Date(Date.now() - 7 * 86400000),
           lte: query.to ? new Date(query.to) : undefined,
@@ -85,7 +99,7 @@ export class MealsService {
       },
       include: { items: { include: { food: true } } },
       orderBy: { eatenAt: 'desc' },
-      take: Math.min(query.limit ?? 100, 500),
+      take: Math.min(Number(query.limit ?? 100), 500),
     });
   }
 
@@ -95,29 +109,11 @@ export class MealsService {
     const from = new Date(Date.now() - days * 86400000);
     const meals = await this.prisma.meal.findMany({
       where: { patientId: patient.id, eatenAt: { gte: from } },
-      include: { items: { include: { food: true } } },
+      select: { totalCalories: true, totalCarbsG: true },
     });
-    const totals = meals.map(m => this.computeTotals(m.items as any));
-    const avgCalories = totals.length ? totals.reduce((a, b) => a + b.calories, 0) / totals.length : 0;
-    const avgCarbs = totals.length ? totals.reduce((a, b) => a + b.carbs, 0) / totals.length : 0;
-    return { mealCount: meals.length, avgCaloriesPerMeal: Math.round(avgCalories), avgCarbsPerMeal: Math.round(avgCarbs), days };
-  }
-
-  private computeTotals(items: Array<{ servingGrams: number; food: any }>) {
-    return items.reduce(
-      (acc, item) => {
-        const ratio = item.servingGrams / 100;
-        const gi = item.food.glycemicIndex ?? 50;
-        const carbs = (item.food.carbsPer100g ?? 0) * ratio;
-        acc.calories += (item.food.caloriesPer100g ?? 0) * ratio;
-        acc.carbs += carbs;
-        acc.protein += (item.food.proteinPer100g ?? 0) * ratio;
-        acc.fat += (item.food.fatPer100g ?? 0) * ratio;
-        acc.fiber += (item.food.fiberPer100g ?? 0) * ratio;
-        acc.glucoseRise += estimateGlucoseRise(carbs, gi);
-        return acc;
-      },
-      { calories: 0, carbs: 0, protein: 0, fat: 0, fiber: 0, glucoseRise: 0 },
-    );
+    const count = meals.length;
+    const avgCalories = count ? meals.reduce((a, m) => a + m.totalCalories, 0) / count : 0;
+    const avgCarbs = count ? meals.reduce((a, m) => a + m.totalCarbsG, 0) / count : 0;
+    return { mealCount: count, avgCaloriesPerMeal: Math.round(avgCalories), avgCarbsPerMeal: Math.round(avgCarbs), days };
   }
 }

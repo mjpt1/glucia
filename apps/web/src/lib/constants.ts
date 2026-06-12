@@ -4,8 +4,8 @@ export const GLUCOSE_CONTEXTS = [
   { value: 'FASTING', label: 'ناشتا' },
   { value: 'BEFORE_MEAL', label: 'قبل از غذا' },
   { value: 'AFTER_MEAL', label: 'بعد از غذا' },
-  { value: 'BEDTIME', label: 'قبل از خواب' },
-  { value: 'WAKEUP', label: 'بعد از بیداری' },
+  { value: 'BEFORE_SLEEP', label: 'قبل از خواب' },
+  { value: 'AFTER_EXERCISE', label: 'بعد از ورزش' },
   { value: 'RANDOM', label: 'تصادفی' },
 ];
 export const MEAL_TYPES = [
@@ -15,9 +15,10 @@ export const MEAL_TYPES = [
   { value: 'SNACK', label: 'میان‌وعده' },
 ];
 export const DIABETES_TYPES = [
-  { value: 'TYPE_1', label: 'دیابت نوع ۱' },
-  { value: 'TYPE_2', label: 'دیابت نوع ۲' },
+  { value: 'TYPE1', label: 'دیابت نوع ۱' },
+  { value: 'TYPE2', label: 'دیابت نوع ۲' },
   { value: 'GESTATIONAL', label: 'دیابت بارداری' },
-  { value: 'PREDIABETES', label: 'پیش دیابت' },
+  { value: 'PREDIABETES', label: 'پیش‌دیابت' },
+  { value: 'LADA', label: 'LADA' },
   { value: 'MODY', label: 'MODY' },
 ];

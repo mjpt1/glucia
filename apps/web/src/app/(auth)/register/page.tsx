@@ -5,14 +5,15 @@ import Link from 'next/link';
 import { useRegister } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Activity } from 'lucide-react';
-import { DIABETES_TYPES } from '@/lib/constants';
+import { Activity, Eye, EyeOff } from 'lucide-react';
 
 export default function RegisterPage() {
-  const [step, setStep] = useState(1);
-  const [form, setForm] = useState({ phone: '', password: '', firstName: '', lastName: '', diabetesType: 'TYPE_2', role: 'PATIENT' });
+  const [form, setForm] = useState({ phone: '', password: '', fullName: '' });
+  const [showPwd, setShowPwd] = useState(false);
   const { mutate, isPending } = useRegister();
-  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
+  const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  const valid = /^09[0-9]{9}$/.test(form.phone) && form.password.length >= 8 && form.fullName.trim().length >= 2;
 
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4" dir="rtl">
@@ -27,62 +28,34 @@ export default function RegisterPage() {
               <Activity className="w-7 h-7 text-white" />
             </div>
             <h1 className="text-xl font-bold text-white">ثبت‌نام در گلوسیا</h1>
+            <p className="text-white/50 text-sm mt-1">مدیریت هوشمند دیابت</p>
           </div>
 
-          <div className="flex gap-2 mb-6">
-            {[1, 2].map(s => (
-              <div key={s} className={`flex-1 h-1 rounded-full transition-all ${s <= step ? 'bg-blue-500' : 'bg-white/10'}`} />
-            ))}
-          </div>
-
-          {step === 1 && (
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-              <div>
-                <label className="text-sm text-white/60 mb-1 block">شماره موبایل</label>
-                <Input type="tel" placeholder="09xxxxxxxxx" value={form.phone} onChange={e => set('phone', e.target.value)} dir="ltr" />
+          <form onSubmit={(e) => { e.preventDefault(); if (valid) mutate(form); }} className="space-y-4">
+            <div>
+              <label className="text-sm text-white/60 mb-1 block">نام و نام خانوادگی</label>
+              <Input placeholder="مثال: علی احمدی" value={form.fullName} onChange={(e) => set('fullName', e.target.value)} required />
+            </div>
+            <div>
+              <label className="text-sm text-white/60 mb-1 block">شماره موبایل</label>
+              <Input type="tel" placeholder="09xxxxxxxxx" value={form.phone} onChange={(e) => set('phone', e.target.value)}
+                pattern="09[0-9]{9}" dir="ltr" className="text-left" required />
+            </div>
+            <div>
+              <label className="text-sm text-white/60 mb-1 block">رمز عبور (حداقل ۸ کاراکتر)</label>
+              <div className="relative">
+                <Input type={showPwd ? 'text' : 'password'} placeholder="رمز عبور قوی انتخاب کنید"
+                  value={form.password} onChange={(e) => set('password', e.target.value)} minLength={8} required />
+                <button type="button" onClick={() => setShowPwd(!showPwd)}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white">
+                  {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
-              <div>
-                <label className="text-sm text-white/60 mb-1 block">رمز عبور</label>
-                <Input type="password" placeholder="حداقل ۸ کاراکتر" value={form.password} onChange={e => set('password', e.target.value)} />
-              </div>
-              <Button className="w-full" onClick={() => setStep(2)} disabled={!form.phone || form.password.length < 6}>
-                مرحله بعد
-              </Button>
-            </motion.div>
-          )}
-
-          {step === 2 && (
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-sm text-white/60 mb-1 block">نام</label>
-                  <Input placeholder="علی" value={form.firstName} onChange={e => set('firstName', e.target.value)} />
-                </div>
-                <div>
-                  <label className="text-sm text-white/60 mb-1 block">نام خانوادگی</label>
-                  <Input placeholder="احمدی" value={form.lastName} onChange={e => set('lastName', e.target.value)} />
-                </div>
-              </div>
-              <div>
-                <label className="text-sm text-white/60 mb-1 block">نوع دیابت</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {DIABETES_TYPES.slice(0, 4).map(t => (
-                    <button key={t.value} type="button" onClick={() => set('diabetesType', t.value)}
-                      className={`py-2 px-3 rounded-xl text-xs transition-all border ${form.diabetesType === t.value ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'}`}>
-                      {t.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setStep(1)} className="flex-1">برگشت</Button>
-                <Button loading={isPending} className="flex-1"
-                  onClick={() => mutate(form)} disabled={!form.firstName}>
-                  ثبت‌نام
-                </Button>
-              </div>
-            </motion.div>
-          )}
+            </div>
+            <Button type="submit" className="w-full" size="lg" loading={isPending} disabled={!valid}>
+              ثبت‌نام
+            </Button>
+          </form>
 
           <div className="mt-4 text-center text-sm text-white/50">
             حساب دارید؟{' '}

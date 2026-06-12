@@ -15,12 +15,12 @@ export class AppointmentsService {
         patientId: patient.id,
         doctorId: dto.doctorId,
         scheduledAt,
-        durationMin: dto.durationMin ?? 30,
+        durationMin: dto.durationMin ? Number(dto.durationMin) : 20,
         kind: dto.kind ?? 'IN_PERSON',
-        reason: dto.reason,
-        meetUrl: dto.kind === 'VIDEO' ? `https://meet.glucia.ir/${Date.now()}` : null,
+        note: dto.reason ?? dto.note,
+        videoRoomId: dto.kind === 'VIDEO' ? `glucia-${Date.now()}` : null,
       },
-      include: { doctor: { include: { user: { select: { firstName: true, lastName: true } } } } },
+      include: { doctor: { include: { user: { select: { fullName: true } } } } },
     });
   }
 
@@ -33,7 +33,7 @@ export class AppointmentsService {
         status: query.status,
         scheduledAt: query.upcoming ? { gte: new Date() } : undefined,
       },
-      include: { doctor: { include: { user: { select: { firstName: true, lastName: true, avatarUrl: true } } } } },
+      include: { doctor: { include: { user: { select: { fullName: true, avatarUrl: true } } } } },
       orderBy: { scheduledAt: query.upcoming ? 'asc' : 'desc' },
     });
   }
@@ -42,24 +42,29 @@ export class AppointmentsService {
     const doctor = await this.prisma.doctor.findUnique({ where: { userId: doctorUserId } });
     if (!doctor) throw new NotFoundException();
     return this.prisma.appointment.findMany({
-      where: { doctorId: doctor.id, status: query.status, scheduledAt: query.date ? { gte: new Date(query.date), lt: new Date(new Date(query.date).getTime() + 86400000) } : undefined },
-      include: { patient: { include: { user: { select: { firstName: true, lastName: true, phone: true } } } } },
+      where: {
+        doctorId: doctor.id,
+        status: query.status,
+        scheduledAt: query.date
+          ? { gte: new Date(query.date), lt: new Date(new Date(query.date).getTime() + 86400000) }
+          : undefined,
+      },
+      include: { patient: { include: { user: { select: { fullName: true, phone: true } } } } },
       orderBy: { scheduledAt: 'asc' },
     });
   }
 
-  async updateStatus(appointmentId: string, status: string, notes?: string) {
+  async updateStatus(appointmentId: string, status: string, note?: string) {
     return this.prisma.appointment.update({
       where: { id: appointmentId },
-      data: { status: status as any, doctorNotes: notes },
+      data: { status: status as any, note: note ?? undefined },
     });
   }
 
   async getDoctors() {
     return this.prisma.doctor.findMany({
-      where: { isActive: true },
-      include: { user: { select: { firstName: true, lastName: true, avatarUrl: true } } },
-      orderBy: { user: { lastName: 'asc' } },
+      include: { user: { select: { fullName: true, avatarUrl: true } } },
+      orderBy: { rating: 'desc' },
     });
   }
 }

@@ -8,7 +8,7 @@ export class PatientsService {
   async getProfile(userId: string) {
     const patient = await this.prisma.patient.findUnique({
       where: { userId },
-      include: { user: { select: { id: true, phone: true, email: true, firstName: true, lastName: true, avatarUrl: true, role: true } } },
+      include: { user: { select: { id: true, phone: true, email: true, fullName: true, avatarUrl: true, role: true } } },
     });
     if (!patient) throw new NotFoundException('بیمار یافت نشد');
     return patient;
@@ -20,20 +20,20 @@ export class PatientsService {
     const [updatedUser, updatedPatient] = await this.prisma.$transaction([
       this.prisma.user.update({
         where: { id: userId },
-        data: { firstName: dto.firstName, lastName: dto.lastName, email: dto.email, avatarUrl: dto.avatarUrl },
+        data: { fullName: dto.fullName ?? undefined, email: dto.email || undefined, avatarUrl: dto.avatarUrl ?? undefined },
       }),
       this.prisma.patient.update({
         where: { id: patient.id },
         data: {
-          dateOfBirth: dto.dateOfBirth ? new Date(dto.dateOfBirth) : undefined,
-          gender: dto.gender,
-          diabetesType: dto.diabetesType,
-          diagnosisYear: dto.diagnosisYear,
-          weightKg: dto.weightKg,
-          heightCm: dto.heightCm,
-          targetGlucoseMin: dto.targetGlucoseMin,
-          targetGlucoseMax: dto.targetGlucoseMax,
-          activityLevel: dto.activityLevel,
+          birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
+          gender: dto.gender ?? undefined,
+          diabetesType: dto.diabetesType ?? undefined,
+          diagnosisYear: dto.diagnosisYear ? Number(dto.diagnosisYear) : undefined,
+          weightKg: dto.weightKg ? Number(dto.weightKg) : undefined,
+          heightCm: dto.heightCm ? Number(dto.heightCm) : undefined,
+          targetGlucoseMin: dto.targetGlucoseMin ? Number(dto.targetGlucoseMin) : undefined,
+          targetGlucoseMax: dto.targetGlucoseMax ? Number(dto.targetGlucoseMax) : undefined,
+          activityLevel: dto.activityLevel ?? undefined,
         },
       }),
     ]);
@@ -41,7 +41,10 @@ export class PatientsService {
   }
 
   async getDashboard(userId: string) {
-    const patient = await this.prisma.patient.findUnique({ where: { userId } });
+    const patient = await this.prisma.patient.findUnique({
+      where: { userId },
+      include: { user: { select: { fullName: true, avatarUrl: true } } },
+    });
     if (!patient) throw new NotFoundException();
     const now = new Date();
     const today = new Date(now.toDateString());
@@ -56,12 +59,12 @@ export class PatientsService {
         include: { items: { include: { food: true } } },
       }),
       this.prisma.appointment.findFirst({
-        where: { patientId: patient.id, scheduledAt: { gte: now }, status: 'PENDING' },
-        include: { doctor: { include: { user: true } } },
+        where: { patientId: patient.id, scheduledAt: { gte: now }, status: { in: ['PENDING', 'CONFIRMED'] } },
+        include: { doctor: { include: { user: { select: { fullName: true } } } } },
         orderBy: { scheduledAt: 'asc' },
       }),
       this.prisma.aiInsight.findMany({
-        where: { patientId: patient.id, expiresAt: { gt: now } },
+        where: { patientId: patient.id, OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
         orderBy: { createdAt: 'desc' },
         take: 3,
       }),
@@ -80,10 +83,10 @@ export class PatientsService {
     if (!patient) throw new NotFoundException();
     const [earned, all] = await Promise.all([
       this.prisma.patientBadge.findMany({ where: { patientId: patient.id }, include: { badge: true }, orderBy: { earnedAt: 'desc' } }),
-      this.prisma.badge.findMany({ where: { isActive: true } }),
+      this.prisma.badge.findMany(),
     ]);
-    const earnedIds = new Set(earned.map(e => e.badgeId));
-    return { earned, locked: all.filter(b => !earnedIds.has(b.id)) };
+    const earnedIds = new Set(earned.map((e) => e.badgeId));
+    return { earned, locked: all.filter((b) => !earnedIds.has(b.id)) };
   }
 
   async getChallenges(userId: string) {
@@ -92,7 +95,7 @@ export class PatientsService {
     return this.prisma.patientChallenge.findMany({
       where: { patientId: patient.id },
       include: { challenge: true },
-      orderBy: { joinedAt: 'desc' },
+      orderBy: { startedAt: 'desc' },
     });
   }
 }

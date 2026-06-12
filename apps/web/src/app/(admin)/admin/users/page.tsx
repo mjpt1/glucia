@@ -58,10 +58,10 @@ export default function AdminUsersPage() {
                 {(users ?? []).map((u: any) => (
                   <div key={u.id} className="flex items-center gap-4 p-4 hover:bg-white/3 transition-all">
                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-sm font-bold text-white">
-                      {u.firstName?.[0] ?? u.phone[2]}
+                      {u.fullName?.[0] ?? u.phone[2]}
                     </div>
                     <div className="flex-1">
-                      <p className="text-white text-sm">{u.firstName ?? ''} {u.lastName ?? ''}</p>
+                      <p className="text-white text-sm">{u.fullName ?? ''}</p>
                       <p className="text-white/40 text-xs">{u.phone} · {u.email}</p>
                     </div>
                     <Badge variant={roleMap[u.role]?.variant ?? 'outline'}>{roleMap[u.role]?.label ?? u.role}</Badge>

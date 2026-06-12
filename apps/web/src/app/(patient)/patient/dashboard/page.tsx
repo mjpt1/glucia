@@ -57,7 +57,7 @@ export default function PatientDashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-white">
-              سلام، {dashboard?.patient?.user?.firstName ?? '...'} 👋
+              سلام، {dashboard?.patient?.user?.fullName ?? '...'} 👋
             </h2>
             <p className="text-white/50 text-sm mt-0.5">آخرین وضعیت سلامت شما</p>
           </div>
@@ -117,8 +117,7 @@ export default function PatientDashboard() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-white font-medium">
-                    {dashboard.upcomingAppointment.doctor?.user?.firstName}{' '}
-                    {dashboard.upcomingAppointment.doctor?.user?.lastName}
+                    {dashboard.upcomingAppointment.doctor?.user?.fullName}
                   </p>
                   <p className="text-white/50 text-sm mt-1">
                     {new Intl.DateTimeFormat('fa-IR', { dateStyle: 'long', timeStyle: 'short' }).format(
@@ -186,9 +185,9 @@ export default function PatientDashboard() {
             <CardContent>
               <div className="flex gap-3 overflow-x-auto pb-1">
                 {dashboard.badges.map((pb: any) => (
-                  <div key={pb.id} className="flex flex-col items-center gap-1 p-3 rounded-xl bg-white/5 border border-white/10 min-w-[80px]">
+                  <div key={pb.badgeId} className="flex flex-col items-center gap-1 p-3 rounded-xl bg-white/5 border border-white/10 min-w-[80px]">
                     <span className="text-2xl">{pb.badge.icon}</span>
-                    <p className="text-xs text-white/70 text-center">{pb.badge.nameFa}</p>
+                    <p className="text-xs text-white/70 text-center">{pb.badge.titleFa}</p>
                   </div>
                 ))}
               </div>

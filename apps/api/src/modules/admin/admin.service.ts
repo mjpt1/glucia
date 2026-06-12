@@ -14,7 +14,11 @@ export class AdminService {
       this.prisma.meal.count(),
       this.prisma.appointment.count(),
     ]);
-    const recentUsers = await this.prisma.user.findMany({ orderBy: { createdAt: 'desc' }, take: 10, select: { id: true, firstName: true, lastName: true, phone: true, role: true, createdAt: true } });
+    const recentUsers = await this.prisma.user.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+      select: { id: true, fullName: true, phone: true, role: true, createdAt: true },
+    });
     return { totals: { users, patients, doctors, glucose, meals, appointments }, recentUsers };
   }
 
@@ -22,16 +26,17 @@ export class AdminService {
     return this.prisma.user.findMany({
       where: {
         role: query.role,
-        OR: query.search ? [
-          { firstName: { contains: query.search, mode: 'insensitive' } },
-          { lastName: { contains: query.search, mode: 'insensitive' } },
-          { phone: { contains: query.search } },
-        ] : undefined,
+        OR: query.search
+          ? [
+              { fullName: { contains: query.search, mode: 'insensitive' } },
+              { phone: { contains: query.search } },
+            ]
+          : undefined,
       },
-      select: { id: true, firstName: true, lastName: true, phone: true, email: true, role: true, isActive: true, createdAt: true },
+      select: { id: true, fullName: true, phone: true, email: true, role: true, isActive: true, createdAt: true },
       orderBy: { createdAt: 'desc' },
-      take: Math.min(query.limit ?? 50, 200),
-      skip: query.offset ?? 0,
+      take: Math.min(Number(query.limit ?? 50), 200),
+      skip: Number(query.offset ?? 0),
     });
   }
 
@@ -42,7 +47,7 @@ export class AdminService {
   async getAuditLogs(query: any) {
     return this.prisma.auditLog.findMany({
       where: { userId: query.userId, action: query.action },
-      include: { user: { select: { firstName: true, lastName: true, phone: true } } },
+      include: { user: { select: { fullName: true, phone: true } } },
       orderBy: { createdAt: 'desc' },
       take: 100,
     });
