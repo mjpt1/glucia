@@ -15,12 +15,12 @@ export default function AdminDashboard() {
   });
 
   const stats = [
-    { label: 'کاربران کل', value: data?.totals?.users, icon: Users, color: 'blue' },
-    { label: 'بیماران', value: data?.totals?.patients, icon: Activity, color: 'green' },
-    { label: 'پزشکان', value: data?.totals?.doctors, icon: Stethoscope, color: 'purple' },
-    { label: 'اندازه‌گیری‌ها', value: data?.totals?.glucose, icon: BarChart3, color: 'cyan' },
-    { label: 'وعده‌ها', value: data?.totals?.meals, icon: Utensils, color: 'orange' },
-    { label: 'نوبت‌ها', value: data?.totals?.appointments, icon: Calendar, color: 'pink' },
+    { label: 'کاربران کل', value: data?.totals?.users, icon: Users, chip: 'bg-blue-500/20', tint: 'text-blue-400' },
+    { label: 'بیماران', value: data?.totals?.patients, icon: Activity, chip: 'bg-green-500/20', tint: 'text-green-400' },
+    { label: 'پزشکان', value: data?.totals?.doctors, icon: Stethoscope, chip: 'bg-purple-500/20', tint: 'text-purple-400' },
+    { label: 'اندازه‌گیری‌ها', value: data?.totals?.glucose, icon: BarChart3, chip: 'bg-cyan-500/20', tint: 'text-cyan-400' },
+    { label: 'وعده‌ها', value: data?.totals?.meals, icon: Utensils, chip: 'bg-orange-500/20', tint: 'text-orange-400' },
+    { label: 'نوبت‌ها', value: data?.totals?.appointments, icon: Calendar, chip: 'bg-pink-500/20', tint: 'text-pink-400' },
   ];
 
   const roleColors: Record<string, any> = { ADMIN: 'destructive', DOCTOR: 'default', PATIENT: 'success' };
@@ -29,18 +29,18 @@ export default function AdminDashboard() {
   return (
     <DashboardLayout title="داشبورد مدیر">
       <div className="space-y-6">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 lg:gap-4">
           {stats.map((s, i) => (
             <motion.div key={s.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
               <Card>
-                <CardContent className="p-5">
+                <CardContent className="p-4 lg:p-5">
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-white/50 text-xs">{s.label}</p>
-                    <div className={`p-1.5 rounded-lg bg-${s.color}-500/20`}>
-                      <s.icon size={14} className={`text-${s.color}-400`} />
+                    <div className={`p-1.5 rounded-lg ${s.chip}`}>
+                      <s.icon size={14} className={s.tint} />
                     </div>
                   </div>
-                  <p className="text-3xl font-bold text-white">{s.value?.toLocaleString('fa-IR') ?? '—'}</p>
+                  <p className="text-2xl lg:text-3xl font-bold text-white">{s.value?.toLocaleString('fa-IR') ?? '—'}</p>
                 </CardContent>
               </Card>
             </motion.div>

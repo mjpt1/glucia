@@ -16,23 +16,23 @@ export default function DoctorDashboard() {
   });
 
   const cards = [
-    { title: 'تعداد بیماران', value: data?.patientCount, icon: Users, color: 'blue' },
-    { title: 'نوبت‌های در انتظار', value: data?.pendingAppointments?.length, icon: Calendar, color: 'orange' },
-    { title: 'بیماران نیاز به توجه', value: data?.criticalPatients?.length, icon: AlertTriangle, color: 'red' },
+    { title: 'تعداد بیماران', value: data?.patientCount, icon: Users, chip: 'bg-blue-500/20', tint: 'text-blue-400' },
+    { title: 'نوبت‌های در انتظار', value: data?.pendingAppointments?.length, icon: Calendar, chip: 'bg-orange-500/20', tint: 'text-orange-400' },
+    { title: 'بیماران نیاز به توجه', value: data?.criticalPatients?.length, icon: AlertTriangle, chip: 'bg-red-500/20', tint: 'text-red-400' },
   ];
 
   return (
     <DashboardLayout title="داشبورد پزشک">
       <div className="space-y-6">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
           {cards.map(c => (
             <motion.div key={c.title} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <Card>
-                <CardContent className="p-5 flex items-center gap-4">
-                  <div className={`p-3 rounded-xl bg-${c.color}-500/20`}>
-                    <c.icon size={20} className={`text-${c.color}-400`} />
+                <CardContent className="p-4 lg:p-5 flex items-center gap-4">
+                  <div className={`p-3 rounded-xl shrink-0 ${c.chip}`}>
+                    <c.icon size={20} className={c.tint} />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-white/50 text-xs">{c.title}</p>
                     <p className="text-2xl font-bold text-white">{c.value ?? '—'}</p>
                   </div>
