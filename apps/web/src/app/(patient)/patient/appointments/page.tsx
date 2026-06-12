@@ -45,7 +45,7 @@ export default function AppointmentsPage() {
   return (
     <DashboardLayout title="نوبت‌ها">
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-wrap justify-between items-center gap-3">
           <p className="text-white/50 text-sm">مدیریت نوبت‌های پزشکی شما</p>
           <Button onClick={() => setShowForm(!showForm)} className="gap-2"><Plus size={16} /> نوبت جدید</Button>
         </div>
@@ -98,7 +98,7 @@ export default function AppointmentsPage() {
             const s = statusLabel[appt.status] ?? { label: appt.status, variant: 'outline' };
             return (
               <Card key={appt.id}>
-                <CardContent className="p-4 flex items-center gap-4">
+                <CardContent className="p-4 flex flex-wrap items-center gap-3 lg:gap-4">
                   <div className="w-12 h-12 rounded-xl bg-blue-600/20 flex items-center justify-center">
                     {appt.kind === 'VIDEO' ? <Video className="text-blue-400" size={20} /> : <Calendar className="text-blue-400" size={20} />}
                   </div>

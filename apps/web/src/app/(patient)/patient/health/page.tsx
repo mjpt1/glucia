@@ -50,7 +50,7 @@ export default function HealthPage() {
   return (
     <DashboardLayout title="فشار خون">
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-white/50 text-sm">پایش فشار خون در کنار قند برای بیماران دیابتی اهمیت دوچندان دارد</p>
           <Button onClick={() => setShowForm(!showForm)} className="gap-2"><Plus size={16} /> ثبت فشار خون</Button>
         </div>

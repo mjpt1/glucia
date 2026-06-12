@@ -54,9 +54,9 @@ export default function PatientDashboard() {
   return (
     <DashboardLayout title="داشبورد">
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-xl font-bold text-white">
+            <h2 className="text-lg lg:text-xl font-bold text-white">
               سلام، {dashboard?.patient?.user?.fullName ?? '...'} 👋
             </h2>
             <p className="text-white/50 text-sm mt-0.5">آخرین وضعیت سلامت شما</p>

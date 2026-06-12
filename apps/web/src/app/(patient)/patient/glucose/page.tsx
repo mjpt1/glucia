@@ -161,9 +161,9 @@ export default function GlucosePage() {
                     <Badge variant={log.valueMgDl < 70 ? 'destructive' : log.valueMgDl <= 180 ? 'success' : 'warning'} className="mr-auto">
                       {glucoseLabel(log.valueMgDl)}
                     </Badge>
-                    <span className="text-white/50 text-xs">{GLUCOSE_CONTEXTS.find(c => c.value === log.context)?.label}</span>
-                    <span className="text-white/30 text-xs">{toJalaliDateTime(log.measuredAt)}</span>
-                    {log.note && <span className="text-white/40 text-xs truncate max-w-[120px]">{log.note}</span>}
+                    <span className="hidden sm:inline text-white/50 text-xs">{GLUCOSE_CONTEXTS.find(c => c.value === log.context)?.label}</span>
+                    <span className="text-white/30 text-xs whitespace-nowrap">{toJalaliDateTime(log.measuredAt)}</span>
+                    {log.note && <span className="hidden md:inline text-white/40 text-xs truncate max-w-[120px]">{log.note}</span>}
                   </motion.div>
                 ))}
               </div>

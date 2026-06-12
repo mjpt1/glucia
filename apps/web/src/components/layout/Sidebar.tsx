@@ -35,7 +35,7 @@ const adminNav = [
   { href: '/admin/settings', label: 'تنظیمات برنامه', icon: Settings },
 ];
 
-export function Sidebar() {
+export function Sidebar({ open = false, onClose }: { open?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
   const nav = user?.role === 'ADMIN' ? adminNav : user?.role === 'DOCTOR' ? doctorNav : patientNav;
@@ -44,7 +44,16 @@ export function Sidebar() {
   const roleName = user?.role === 'ADMIN' ? 'مدیر سیستم' : user?.role === 'DOCTOR' ? 'پزشک' : 'بیمار';
 
   return (
-    <div className="fixed right-0 top-0 h-full w-64 flex flex-col bg-gray-950/80 backdrop-blur-xl border-l border-white/10 z-40">
+    <>
+    {/* Mobile backdrop */}
+    {open && (
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden" onClick={onClose} />
+    )}
+    <div className={cn(
+      'fixed right-0 top-0 h-full w-64 flex flex-col bg-gray-950/95 lg:bg-gray-950/80 backdrop-blur-xl border-l border-white/10 z-50',
+      'transition-transform duration-300 lg:translate-x-0',
+      open ? 'translate-x-0' : 'translate-x-full',
+    )}>
       {/* Logo */}
       <div className="p-6 border-b border-white/10">
         <Link href="/" className="flex items-center gap-3">
@@ -80,7 +89,7 @@ export function Sidebar() {
           const Icon = item.icon;
           const active = pathname === item.href || pathname.startsWith(item.href + '/');
           return (
-            <Link key={item.href} href={item.href}>
+            <Link key={item.href} href={item.href} onClick={onClose}>
               <motion.div
                 whileHover={{ x: -2 }}
                 className={cn(
@@ -107,5 +116,6 @@ export function Sidebar() {
         </button>
       </div>
     </div>
+    </>
   );
 }

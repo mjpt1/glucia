@@ -45,7 +45,7 @@ export default function MealsPage() {
   return (
     <DashboardLayout title="وعده‌های غذایی">
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-white/70 text-sm">ثبت وعده‌های روزانه برای محاسبه کربوهیدرات و تأثیر بر قند خون</h2>
           <Button onClick={() => setShowForm(!showForm)} className="gap-2">
             <Plus size={16} /> ثبت وعده جدید

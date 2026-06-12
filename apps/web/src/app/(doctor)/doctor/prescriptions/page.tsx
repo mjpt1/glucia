@@ -50,7 +50,7 @@ export default function DoctorPrescriptionsPage() {
   return (
     <DashboardLayout title="نسخه‌ها">
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-white/50 text-sm">نسخه‌های صادرشده برای بیماران شما</p>
           <Button onClick={() => setShowForm(!showForm)} className="gap-2"><Plus size={16} /> نسخه جدید</Button>
         </div>

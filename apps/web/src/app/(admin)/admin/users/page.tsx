@@ -152,7 +152,7 @@ export default function AdminUsersPage() {
                       <p className="text-white/40 text-xs">{u.phone}{u.email ? ` · ${u.email}` : ''}</p>
                     </div>
                     <Badge variant={roleMap[u.role]?.variant ?? 'outline'}>{roleMap[u.role]?.label ?? u.role}</Badge>
-                    <span className="text-white/30 text-xs">{toJalaliDateTime(u.createdAt)}</span>
+                    <span className="hidden md:inline text-white/30 text-xs whitespace-nowrap">{toJalaliDateTime(u.createdAt)}</span>
                     <button onClick={() => toggleUser({ id: u.id, isActive: !u.isActive })}
                       title={u.isActive ? 'غیرفعال‌سازی' : 'فعال‌سازی'}
                       className={`transition-all ${u.isActive ? 'text-green-400 hover:text-red-400' : 'text-red-400 hover:text-green-400'}`}>
