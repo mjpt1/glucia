@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Patch, Body, Query, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Body, Query, Param, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { JwtGuard } from '../../common/guards/jwt.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -30,4 +30,16 @@ export class AdminController {
 
   @Put('settings')
   updateSettings(@Body() dto: Record<string, string>) { return this.admin.updateSettings(dto); }
+
+  @Get('foods')
+  getFoods(@Query() query: any) { return this.admin.getFoods(query); }
+
+  @Post('foods')
+  createFood(@Body() dto: any) { return this.admin.createFood(dto); }
+
+  @Post('foods/import')
+  importFoods(@Body('foods') foods: any[]) { return this.admin.importFoods(foods); }
+
+  @Delete('foods/:id')
+  deleteFood(@Param('id') id: string) { return this.admin.deleteFood(id); }
 }

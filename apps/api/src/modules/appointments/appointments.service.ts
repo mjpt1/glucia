@@ -55,10 +55,19 @@ export class AppointmentsService {
   }
 
   async updateStatus(appointmentId: string, status: string, note?: string) {
-    return this.prisma.appointment.update({
+    const appt = await this.prisma.appointment.update({
       where: { id: appointmentId },
       data: { status: status as any, note: note ?? undefined },
     });
+    // Confirming an appointment links the patient to that doctor so they show
+    // up in the doctor's patient list (only when no primary doctor is set yet).
+    if (status === 'CONFIRMED') {
+      await this.prisma.patient.updateMany({
+        where: { id: appt.patientId, primaryDoctorId: null },
+        data: { primaryDoctorId: appt.doctorId },
+      });
+    }
+    return appt;
   }
 
   async getDoctors() {

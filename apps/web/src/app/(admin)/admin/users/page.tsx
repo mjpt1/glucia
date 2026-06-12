@@ -26,7 +26,17 @@ export default function AdminUsersPage() {
   const [form, setForm] = useState({ fullName: '', phone: '', password: '', role: 'PATIENT', specialty: '' });
 
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: k === 'phone' ? faToEnDigits(v) : v }));
-  const formValid = /^09[0-9]{9}$/.test(form.phone) && form.password.length >= 8 && form.fullName.trim().length >= 2;
+
+  const phoneOk = /^09[0-9]{9}$/.test(form.phone);
+  const passOk = form.password.length >= 8;
+  const nameOk = form.fullName.trim().length >= 2;
+
+  const submitCreate = () => {
+    if (!nameOk) { toast.error('نام و نام خانوادگی را کامل وارد کنید'); return; }
+    if (!phoneOk) { toast.error('شماره موبایل باید ۱۱ رقم و با ۰۹ شروع شود'); return; }
+    if (!passOk) { toast.error('رمز عبور باید حداقل ۸ کاراکتر باشد'); return; }
+    createUser(form);
+  };
 
   const { data: users, isLoading } = useQuery({
     queryKey: ['admin', 'users', search, roleFilter],
@@ -92,10 +102,12 @@ export default function AdminUsersPage() {
                     <div>
                       <label className="text-xs text-white/60 mb-1 block">شماره موبایل</label>
                       <Input type="tel" placeholder="09xxxxxxxxx" value={form.phone} onChange={e => set('phone', e.target.value)} dir="ltr" className="text-left" />
+                      {form.phone && !phoneOk && <p className="text-red-400 text-[11px] mt-1">۱۱ رقم، شروع با ۰۹ (ارقام فارسی هم پذیرفته می‌شود)</p>}
                     </div>
                     <div>
                       <label className="text-xs text-white/60 mb-1 block">رمز عبور (حداقل ۸ کاراکتر)</label>
                       <Input type="text" placeholder="رمز اولیه کاربر" value={form.password} onChange={e => set('password', e.target.value)} dir="ltr" className="text-left" />
+                      {form.password && !passOk && <p className="text-red-400 text-[11px] mt-1">حداقل ۸ کاراکتر — فعلاً {form.password.length.toLocaleString('fa-IR')} کاراکتر</p>}
                     </div>
                     <div>
                       <label className="text-xs text-white/60 mb-1 block">نقش</label>
@@ -115,7 +127,7 @@ export default function AdminUsersPage() {
                       </div>
                     )}
                   </div>
-                  <Button className="w-full" onClick={() => createUser(form)} loading={creating} disabled={!formValid}>
+                  <Button className="w-full" onClick={submitCreate} loading={creating}>
                     ساخت کاربر
                   </Button>
                 </CardContent>

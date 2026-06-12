@@ -30,6 +30,7 @@ const doctorNav = [
 const adminNav = [
   { href: '/admin/dashboard', label: 'داشبورد', icon: LayoutDashboard },
   { href: '/admin/users', label: 'کاربران', icon: Users },
+  { href: '/admin/foods', label: 'غذاها', icon: Utensils },
   { href: '/admin/reports', label: 'گزارش‌ها', icon: FileText },
   { href: '/admin/settings', label: 'تنظیمات برنامه', icon: Settings },
 ];

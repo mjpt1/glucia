@@ -19,7 +19,12 @@ export class DoctorsService {
     if (!doctor) throw new NotFoundException();
     return this.prisma.patient.findMany({
       where: {
-        primaryDoctorId: doctor.id,
+        // A patient belongs to this doctor's list if they are assigned as
+        // primary OR have ever booked an appointment with them.
+        OR: [
+          { primaryDoctorId: doctor.id },
+          { appointments: { some: { doctorId: doctor.id } } },
+        ],
         user: query.search
           ? {
               OR: [
@@ -42,7 +47,13 @@ export class DoctorsService {
     const doctor = await this.prisma.doctor.findUnique({ where: { userId: doctorUserId } });
     if (!doctor) throw new NotFoundException();
     const patient = await this.prisma.patient.findFirst({
-      where: { id: patientId, primaryDoctorId: doctor.id },
+      where: {
+        id: patientId,
+        OR: [
+          { primaryDoctorId: doctor.id },
+          { appointments: { some: { doctorId: doctor.id } } },
+        ],
+      },
       include: {
         user: { select: { fullName: true, phone: true, email: true, avatarUrl: true } },
         glucoseLogs: { orderBy: { measuredAt: 'desc' }, take: 20 },
@@ -60,6 +71,17 @@ export class DoctorsService {
   async createPrescription(doctorUserId: string, dto: any) {
     const doctor = await this.prisma.doctor.findUnique({ where: { userId: doctorUserId } });
     if (!doctor) throw new NotFoundException();
+    const allowed = await this.prisma.patient.findFirst({
+      where: {
+        id: dto.patientId,
+        OR: [
+          { primaryDoctorId: doctor.id },
+          { appointments: { some: { doctorId: doctor.id } } },
+        ],
+      },
+      select: { id: true },
+    });
+    if (!allowed) throw new NotFoundException('این بیمار در فهرست بیماران شما نیست');
     return this.prisma.prescription.create({
       data: {
         patientId: dto.patientId,
