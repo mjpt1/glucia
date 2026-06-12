@@ -28,7 +28,7 @@ export default function RegisterPage() {
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-3">
               <Activity className="w-7 h-7 text-white" />
             </div>
-            <h1 className="text-xl font-bold text-white">ثبت‌نام در گلوسیا</h1>
+            <h1 className="text-xl font-bold text-white">ثبت‌نام در مهسا</h1>
             <p className="text-white/50 text-sm mt-1">مدیریت هوشمند دیابت</p>
           </div>
 

@@ -65,7 +65,7 @@ export default function AdminFoodsPage() {
     const ws = XLSX.utils.json_to_sheet(SAMPLE_ROWS);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Foods');
-    XLSX.writeFile(wb, 'glucia-foods-template.xlsx');
+    XLSX.writeFile(wb, 'mahsa-foods-template.xlsx');
   };
 
   const handleFile = async (file: File) => {

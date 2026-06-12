@@ -52,7 +52,7 @@ export function Sidebar() {
             <Activity className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-white">گلوسیا</h1>
+            <h1 className="text-lg font-bold text-white">مهسا</h1>
             <p className="text-xs text-white/40">مدیریت دیابت</p>
           </div>
         </Link>

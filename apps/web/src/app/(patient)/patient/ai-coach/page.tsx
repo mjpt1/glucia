@@ -20,7 +20,7 @@ const QUICK_PROMPTS = [
 
 export default function AiCoachPage() {
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: 'سلام! من کوچ هوشمند گلوسیا هستم. هر سوالی درباره دیابت، قند خون، تغذیه یا سبک زندگی داری بپرس. 🌟' },
+    { role: 'assistant', content: 'سلام! من کوچ هوشمند مهسا هستم. هر سوالی درباره دیابت، قند خون، تغذیه یا سبک زندگی داری بپرس. 🌟' },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -55,7 +55,7 @@ export default function AiCoachPage() {
               <Bot className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-white font-bold">کوچ گلوسیا</h2>
+              <h2 className="text-white font-bold">کوچ مهسا</h2>
               <p className="text-white/50 text-sm">مشاور هوشمند دیابت — پاسخ‌های شخصی‌سازی‌شده</p>
             </div>
             <div className="mr-auto flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20">

@@ -1,13 +1,33 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'react-hot-toast';
 import Providers from './providers';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'گلوسیا - مدیریت هوشمند دیابت',
+  title: 'مهسا — مدیریت هوشمند دیابت',
   description: 'پلتفرم جامع مدیریت دیابت با هوش مصنوعی',
-  keywords: ['دیابت', 'قند خون', 'مدیریت سلامت', 'هوش مصنوعی'],
+  keywords: ['دیابت', 'قند خون', 'مدیریت سلامت', 'هوش مصنوعی', 'مهسا'],
+  applicationName: 'مهسا',
+  appleWebApp: {
+    capable: true,
+    title: 'مهسا',
+    statusBarStyle: 'black-translucent',
+  },
+  icons: {
+    icon: [
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: '/icons/apple-touch-icon.png',
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#030712',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

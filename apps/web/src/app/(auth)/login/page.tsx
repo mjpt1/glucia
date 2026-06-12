@@ -29,7 +29,7 @@ export default function LoginPage() {
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/30">
               <Activity className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-white">ورود به گلوسیا</h1>
+            <h1 className="text-2xl font-bold text-white">ورود به مهسا</h1>
             <p className="text-white/50 text-sm mt-1">مدیریت هوشمند دیابت</p>
           </div>
 

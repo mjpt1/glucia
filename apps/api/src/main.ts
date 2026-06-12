@@ -45,8 +45,8 @@ async function createApp() {
 
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
-      .setTitle('Glucia API')
-      .setDescription('پلتفرم هوشمند مدیریت دیابت')
+      .setTitle('Mahsa API')
+      .setDescription('مهسا — پلتفرم هوشمند مدیریت دیابت')
       .setVersion('1.0')
       .addBearerAuth()
       .build();
