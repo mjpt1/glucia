@@ -151,7 +151,14 @@ export default function AdminSettingsPage() {
         <Card>
           <CardHeader><CardTitle>اطلاعات سامانه</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm text-white/60">
+            <div className="flex justify-between py-1 border-b border-white/5"><span>نام برنامه</span><span className="text-white">مهسا — مدیریت هوشمند دیابت</span></div>
             <div className="flex justify-between py-1 border-b border-white/5"><span>نسخه</span><span className="text-white">1.1.0</span></div>
+            <div className="flex justify-between py-1 border-b border-white/5"><span>برنامه‌نویس</span><span className="text-white">محسن جباره اصل</span></div>
+            <div className="flex justify-between py-1 border-b border-white/5">
+              <span>طراحی و برنامه‌نویسی</span>
+              <a href="https://mahsen81.ir" target="_blank" rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 transition-colors" dir="ltr">mahsen81.ir</a>
+            </div>
             <div className="flex justify-between py-1 border-b border-white/5"><span>API</span><span className="text-white" dir="ltr">glucia-api.vercel.app</span></div>
             <div className="flex justify-between py-1"><span>پایگاه داده</span><span className="text-white">PostgreSQL (Prisma)</span></div>
           </CardContent>
